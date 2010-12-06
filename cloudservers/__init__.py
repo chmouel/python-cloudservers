@@ -37,9 +37,9 @@ class CloudServers(object):
     &c.
     """
     
-    def __init__(self, username, apikey):
+    def __init__(self, username, apikey, **kwargs):
         self.backup_schedules = BackupScheduleManager(self)
-        self.client = CloudServersClient(username, apikey)
+        self.client = CloudServersClient(username, apikey, **kwargs)
         self.flavors = FlavorManager(self)
         self.images = ImageManager(self)
         self.ipgroups = IPGroupManager(self)

@@ -13,27 +13,30 @@ if not hasattr(urlparse, 'parse_qsl'):
     urlparse.parse_qsl = cgi.parse_qsl
 
 import cloudservers
+import constants
 from cloudservers import exceptions
 
 class CloudServersClient(httplib2.Http):
     
-    AUTH_URL = 'https://auth.api.rackspacecloud.com/v1.0'
-    USER_AGENT = 'python-cloudservers/%s' % cloudservers.__version__
-    
-    def __init__(self, user, apikey):
+    def __init__(self, user, apikey,
+                 user_agent=constants.USER_AGENT,
+                 auth_url=constants.AUTH_URL):
         super(CloudServersClient, self).__init__()
         self.user = user
         self.apikey = apikey
         
         self.management_url = None
         self.auth_token = None
+
+        self.auth_url = auth_url
+        self.user_agent = user_agent
         
         # httplib2 overrides
         self.force_exception_to_status_code = True
 
     def request(self, *args, **kwargs):
         kwargs.setdefault('headers', {})
-        kwargs['headers']['User-Agent'] = self.USER_AGENT
+        kwargs['headers']['User-Agent'] = self.user_agent
         if 'body' in kwargs:
             kwargs['headers']['Content-Type'] = 'application/json'
             kwargs['body'] = json.dumps(kwargs['body'])
@@ -83,7 +86,7 @@ class CloudServersClient(httplib2.Http):
 
     def authenticate(self):
         headers = {'X-Auth-User': self.user, 'X-Auth-Key': self.apikey}
-        resp, body = self.request(self.AUTH_URL, 'GET', headers=headers)
+        resp, body = self.request(self.auth_url, 'GET', headers=headers)
         self.management_url = resp['x-server-management-url']
         self.auth_token = resp['x-auth-token']
         

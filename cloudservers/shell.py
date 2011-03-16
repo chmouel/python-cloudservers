@@ -71,6 +71,10 @@ class CloudserversShell(object):
         self.parser.add_argument('--apikey',
             default = env('CLOUD_SERVERS_API_KEY'),
             help='Defaults to env[CLOUD_SERVERS_API_KEY].')
+
+        self.parser.add_argument('--authurl',
+            default = env('CLOUD_SERVERS_AUTH_URL'),
+            help='Defaults to env[CLOUD_SERVERS_AUTH_URL].')
         
         # Subcommands
         subparsers = self.parser.add_subparsers(metavar='<subcommand>')
@@ -121,7 +125,10 @@ class CloudserversShell(object):
             raise CommandError("You must provide an API key, either via "
                                "--apikey or via env[CLOUD_SERVERS_API_KEY]")
 
-        self.cs = self._api_class(user, apikey)
+        if args.authurl:
+            self.cs = self._api_class(user, apikey, auth_url=args.authurl)
+        else:
+            self.cs = self._api_class(user, apikey)
         try:
             self.cs.authenticate()
         except cloudservers.Unauthorized:
